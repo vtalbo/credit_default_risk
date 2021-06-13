@@ -10,9 +10,8 @@ def predict_credit(credit_id):
         test = pd.read_csv('m_test_10.csv', index_col='SK_ID_CURR')
         x = test.loc[int(credit_id), :]
         # load the model from disk
-        open_file = open('finalized_model.sav', 'rb')
-        return "FILE OPENED"
-        loaded_model = pickle.load(open_file)
+        with open('finalized_model.sav', 'rb') as file:
+            loaded_model = pickle.load(file)
         # Predict payment default
         result = loaded_model.predict(x.to_numpy().reshape(1, -1))
         if result[0]:
