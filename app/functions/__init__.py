@@ -11,6 +11,7 @@ def predict_credit(credit_id):
         x = test.loc[int(credit_id), :]
         # load the model from disk
         loaded_model = pickle.load(open('finalized_model.sav', 'rb'))
+        return "OK ?"
         # Predict payment default
         result = loaded_model.predict(x.to_numpy().reshape(1, -1))
         if result[0]:
