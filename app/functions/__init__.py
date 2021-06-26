@@ -26,7 +26,7 @@ def predict_credit(credit_id):
             name = 'ACCEPTED.png'
         div_image = Div(text='<img src="/static/' + name + '">', height=200)
         p = feature_importances(credit_id)
-        layouts = layout([[div_image], [p], ])
+        layouts = layout([[div_image], [p], ], sizing_mode="scale_height")
 
         return file_html(layouts, CDN, "Loan Acceptance")
 
