@@ -11,7 +11,7 @@ from bokeh.resources import CDN
 from bokeh.sampledata.iris import flowers
 
 from app.functions import predict_credit
-from app.functions.bokeh_plot import bokeh_table, bokeh_plot, bokeh_dashboard
+from app.functions.bokeh_plot import bokeh_table, bokeh_plot, bokeh_dashboard, feature_importances
 
 app = Flask(__name__)
 
@@ -65,6 +65,7 @@ def result_credit():
         return f"The URL /data is accessed directly. Try going to '/test_credit' to submit credit_ID"
     if request.method == 'POST':
         return predict_credit(request.form['credit_ID'])
+        # return feature_importances(request.form['credit_ID'])
 
 
 @app.route('/hello')

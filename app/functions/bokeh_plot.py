@@ -2,17 +2,19 @@ from bokeh.resources import CDN
 from bokeh.embed import file_html
 
 import numpy as np
+import pickle
 
 from bokeh.layouts import column, grid
 from bokeh.models import ColumnDataSource, CustomJS, PrintfTickFormatter, Select
 from bokeh.plotting import figure
 from bokeh.models.tools import HoverTool
 from bokeh.models.widgets import DataTable, TableColumn
-
+from bokeh.palettes import Spectral10
 import pandas as pd
 
 
 def bokeh_plot():
+
     data_for_bokeh = pd.read_csv('app/data/data-for-bokeh.csv', index_col='SK_ID_CURR')
     data = pd.DataFrame(data_for_bokeh.TARGET.value_counts()).reset_index()
     data['percent'] = data['TARGET'] / sum(data['TARGET']) * 100
@@ -195,3 +197,55 @@ def bokeh_dashboard():
     ], sizing_mode='stretch_both')
 
     return file_html(layout, CDN, "DASHBOARD")
+
+
+def feature_importances(credit_id):
+    test = pd.read_csv('app/data/m_test.csv', index_col='SK_ID_CURR')
+    loaded_model = pickle.load(open('app/models/finalized_model.sav', 'rb'))
+
+    feature_importance = pd.DataFrame({'feature': list(test.columns),
+                                       'importance': loaded_model.feature_importances_})
+    feature_importance = feature_importance.merge(test.loc[int(credit_id), :].reset_index(),
+                                                  left_on='feature', right_on='index').drop(
+        columns='index').sort_values('importance',
+                                     ascending=False).head(10)
+
+    feature_importance = feature_importance.rename(columns={int(credit_id): 'value'})
+    feature_importance['Name'] = ['Years of credit', 'Years employed', 'Days since last phone change', 'Age',
+                                  'What the client actually paid on previous credit on this installment(sum of minimum)',
+                                  'Annuity payment', 'Credit amount',
+                                  'Installments left to pay on the previous credit (max of mean)',
+                                  'How many days before current application did client apply for Credit Bureau credit '
+                                  '(max)',
+                                  'How many days before the application did client change the identity document with '
+                                  'which he applied for the loan']
+
+    # Convert columns to correct values
+    feature_importance.loc[feature_importance.feature == 'DAYS_EMPLOYED', 'value'] = feature_importance.loc[
+                                                                                         feature_importance.feature == 'DAYS_EMPLOYED', 'value'] / -365.25
+    feature_importance.loc[feature_importance.feature == 'DAYS_EMPLOYED', 'feature'] = 'YEARS_EMPLOYED'
+    feature_importance.loc[feature_importance.feature == 'DAYS_BIRTH', 'value'] = feature_importance.loc[
+                                                                                      feature_importance.feature == 'DAYS_BIRTH', 'value'] / -365.25
+    feature_importance.loc[feature_importance.feature == 'DAYS_BIRTH', 'feature'] = 'AGE'
+    feature_importance.loc[feature_importance.feature == 'bureau_DAYS_CREDIT_max', 'value'] = - \
+        feature_importance.loc[feature_importance.feature == 'bureau_DAYS_CREDIT_max', 'value']
+    feature_importance.loc[feature_importance.feature == 'DAYS_ID_PUBLISH', 'value'] = -feature_importance.loc[
+        feature_importance.feature == 'DAYS_ID_PUBLISH', 'value']
+    feature_importance.loc[feature_importance.feature == 'DAYS_LAST_PHONE_CHANGE', 'value'] = - \
+        feature_importance.loc[feature_importance.feature == 'DAYS_LAST_PHONE_CHANGE', 'value']
+
+    # Bokeh Figure
+    yrange = feature_importance.sort_values(by='importance').feature.to_list()
+    source = ColumnDataSource(data=feature_importance)
+    source.data['color'] = Spectral10
+    p = figure(y_range=yrange, x_range=(300, 1700), plot_height=400, title="Features importance",
+               tools=[HoverTool()], tooltips="@Name : @value{f}",
+               toolbar_location=None)
+
+    p.hbar(y='feature', right='importance', height=0.9, color='color', source=source)
+
+    p.xgrid.grid_line_color = None
+
+    return [p]
+
+

@@ -2,6 +2,11 @@
 import pandas as pd
 import pickle
 import lightgbm
+from app.functions.bokeh_plot import feature_importances
+from bokeh.models.widgets import Div
+from bokeh.layouts import layout
+from bokeh.resources import CDN
+from bokeh.embed import file_html
 
 
 def predict_credit(credit_id):
@@ -16,8 +21,14 @@ def predict_credit(credit_id):
         # Predict payment default
         result = loaded_model.predict(x.to_numpy().reshape(1, -1))
         if result[0]:
-            return "CRÉDIT REFUSÉ"
+            name = 'DENIED.png'
         else:
-            return "CRÉDIT ACCEPTÉ"
+            name = 'ACCEPTED.png'
+        div_image = Div(text='<img src="/static/' + name + '">', height=200)
+        p = feature_importances(credit_id)
+        layouts = layout([[div_image], [p], ])
+
+        return file_html(layouts, CDN, "Loan Acceptance")
+
     except KeyError:
         return "Cet ID n'est pas présent dans notre base de données"
