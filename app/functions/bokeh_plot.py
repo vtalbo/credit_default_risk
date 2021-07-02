@@ -205,6 +205,8 @@ def feature_importances(credit_id):
 
     feature_importance = pd.DataFrame({'feature': list(test.columns),
                                        'importance': loaded_model.feature_importances_})
+    feature_importance['relative_importance'] = 100 * feature_importance['importance'] / sum(
+        feature_importance['importance'])
     feature_importance = feature_importance.merge(test.loc[int(credit_id), :].reset_index(),
                                                   left_on='feature', right_on='index').drop(
         columns='index').sort_values('importance',
@@ -238,11 +240,12 @@ def feature_importances(credit_id):
     yrange = feature_importance.sort_values(by='importance').feature.to_list()
     source = ColumnDataSource(data=feature_importance)
     source.data['color'] = Spectral10
-    p = figure(y_range=yrange, x_range=(300, 1700), plot_height=400, title="Features importance",
+    p = figure(y_range=yrange, x_range=(0, 4), plot_height=400, title="Relative feature importance",
                tools=[HoverTool()], tooltips="@Name : @value{f}",
-               toolbar_location=None)
+               toolbar_location=None,x_axis_label="Relative feature importance (in %)",
+                   y_axis_label="Feature")
 
-    p.hbar(y='feature', right='importance', height=0.9, color='color', source=source)
+    p.hbar(y='feature', right='relative_importance', height=0.9, color='color', source=source)
 
     p.xgrid.grid_line_color = None
 
