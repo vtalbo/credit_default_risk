@@ -8,13 +8,12 @@ from bokeh.layouts import column, grid
 from bokeh.models import ColumnDataSource, CustomJS, PrintfTickFormatter, Select
 from bokeh.plotting import figure
 from bokeh.models.tools import HoverTool
-from bokeh.models.widgets import DataTable, TableColumn
+from bokeh.models.widgets import DataTable, TableColumn, Div
 from bokeh.palettes import Spectral10
 import pandas as pd
 
 
 def bokeh_plot():
-
     data_for_bokeh = pd.read_csv('app/data/data-for-bokeh.csv', index_col='SK_ID_CURR')
     data = pd.DataFrame(data_for_bokeh.TARGET.value_counts()).reset_index()
     data['percent'] = data['TARGET'] / sum(data['TARGET']) * 100
@@ -79,8 +78,8 @@ def bokeh_dashboard():
         source = ColumnDataSource(data_for_bokeh.sort_values(by='previous_loan_counts', ascending=False).head(10))
 
         columns = [
-            TableColumn(field="SK_ID_CURR", title="SK_ID_CURR"),
-            TableColumn(field="previous_loan_counts", title="previous_loan_counts"),
+            TableColumn(field="SK_ID_CURR", title="Client ID"),
+            TableColumn(field="previous_loan_counts", title="Number of previous loans"),
         ]
         data_table = DataTable(source=source, columns=columns, width=400, height=280)
 
@@ -183,18 +182,22 @@ def bokeh_dashboard():
             """)
 
         # Selecteur
-        select = Select(title="Value to show:", options=["Clients age", 'Credit Term', 'Years employed'])
+        select = Select(title="Select feature to show:", options=["Clients age", 'Credit Term', 'Years employed'])
         select.js_on_change('value', handler)
         select.js_on_change('value', handler_2)
         select.js_on_change('value', handler_3)
 
         return [column(select, p)]
 
+    title_div = Div(text="<b>CREDIT HOME DEFAULT - DASHBOARD</b>", style={'font-size': '200%', 'color': 'blue'})
+    credit_div = Div(text="<b>Payment default repartition</b>", style={'font-size': '100%'})
+    previous_div = Div(text="<b>Clients with most previous loans</b>", style={'font-size': '100%'})
+    hist_div = Div(text="<b>Repartition of clients according to the following variable</b>", style={'font-size': '100%'})
     layout = grid([
-        [number_of_credits(),
-         table_previous_loans()],
-        histograms(),
-    ], sizing_mode='stretch_both')
+        title_div, [[credit_div, number_of_credits()],
+                    [previous_div, table_previous_loans()]],
+        [[hist_div, histograms()]],
+    ], sizing_mode='stretch_width')
 
     return file_html(layout, CDN, "DASHBOARD")
 
@@ -242,13 +245,11 @@ def feature_importances(credit_id):
     source.data['color'] = Spectral10
     p = figure(y_range=yrange, x_range=(0, 4), plot_height=400, title="Relative feature importance",
                tools=[HoverTool()], tooltips="@Name : @value{f}",
-               toolbar_location=None,x_axis_label="Relative feature importance (in %)",
-                   y_axis_label="Feature")
+               toolbar_location=None, x_axis_label="Relative feature importance (in %)",
+               y_axis_label="Feature")
 
     p.hbar(y='feature', right='relative_importance', height=0.9, color='color', source=source)
 
     p.xgrid.grid_line_color = None
 
     return [p]
-
-
