@@ -58,13 +58,14 @@ def bokeh_dashboard():
         data = pd.DataFrame(data_for_bokeh.TARGET.value_counts()).reset_index()
         data['percent'] = data['TARGET'] / sum(data['TARGET']) * 100
         data['index'] = data['index'].astype(str).replace({'True': 'Default', 'False': 'No Default'})
+        data['colors'] = ["#718dbf","#c9d9d3"]
         values = data['index'].unique()
 
-        p = figure(x_range=values, plot_height=200, title="Number of contracts", tools=[HoverTool()],
+        p = figure(x_range=values, plot_height=280, title="Number of contracts", tools=[HoverTool()],
                    tooltips="@index : @TARGET (@percent{0.2f} %)",
                    toolbar_location=None)
 
-        p.vbar(x="index", top="TARGET", width=0.6, source=data)
+        p.vbar(x="index", top="TARGET", width=0.6, source=data, color='colors')
 
         p.xgrid.grid_line_color = None
         p.y_range.start = 0
