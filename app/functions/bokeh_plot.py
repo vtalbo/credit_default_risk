@@ -14,6 +14,8 @@ import pandas as pd
 
 
 def bokeh_plot():
+    """ plot principal dashboard with credit info, previous loans and 3 variables"""
+
     data_for_bokeh = pd.read_csv('app/data/data-for-bokeh.csv', index_col='SK_ID_CURR')
     data = pd.DataFrame(data_for_bokeh.TARGET.value_counts()).reset_index()
     data['percent'] = data['TARGET'] / sum(data['TARGET']) * 100
@@ -52,8 +54,8 @@ def bokeh_dashboard():
 
     def number_of_credits():
         data_for_bokeh = pd.read_csv('app/data/data-for-bokeh.csv', index_col='SK_ID_CURR')
-        data_for_bokeh['YEARS_EMPLOYED'] = data_for_bokeh['DAYS_EMPLOYED'] / -365.25
-        data_for_bokeh['CLIENT_AGE'] = data_for_bokeh['DAYS_BIRTH'] / -365.25
+        #data_for_bokeh['YEARS_EMPLOYED'] = data_for_bokeh['DAYS_EMPLOYED'] / -365.25
+        #data_for_bokeh['CLIENT_AGE'] = data_for_bokeh['DAYS_BIRTH'] / -365.25
 
         data = pd.DataFrame(data_for_bokeh.TARGET.value_counts()).reset_index()
         data['percent'] = data['TARGET'] / sum(data['TARGET']) * 100
@@ -88,8 +90,8 @@ def bokeh_dashboard():
 
     def histograms():
         data_for_bokeh = pd.read_csv('app/data/data-for-bokeh.csv', index_col='SK_ID_CURR')
-        data_for_bokeh['YEARS_EMPLOYED'] = data_for_bokeh['DAYS_EMPLOYED'] / -365.25
-        data_for_bokeh['CLIENT_AGE'] = data_for_bokeh['DAYS_BIRTH'] / -365.25
+        #data_for_bokeh['YEARS_EMPLOYED'] = data_for_bokeh['DAYS_EMPLOYED'] / -365.25
+        #data_for_bokeh['CLIENT_AGE'] = data_for_bokeh['DAYS_BIRTH'] / -365.25
 
         def create_hist(df, column_name, target_name):
             data_hist = {}
@@ -108,7 +110,7 @@ def bokeh_dashboard():
 
             return data_hist
 
-        data_hist_AGE = create_hist(data_for_bokeh, "CLIENT_AGE", "TARGET")
+        data_hist_AGE = create_hist(data_for_bokeh, "AGE", "TARGET")
         data_hist_CREDIT = create_hist(data_for_bokeh, "CREDIT_TERM", "TARGET")
         data_hist_YEARS = create_hist(data_for_bokeh, "YEARS_EMPLOYED", "TARGET")
 
@@ -254,3 +256,5 @@ def feature_importances(credit_id):
     p.xgrid.grid_line_color = None
 
     return [p]
+
+

@@ -10,7 +10,7 @@ from bokeh.plotting import figure
 from bokeh.resources import CDN
 from bokeh.sampledata.iris import flowers
 
-from app.functions import predict_credit
+from app.functions import predict_credit, predict_credit_page
 from app.functions.bokeh_plot import bokeh_table, bokeh_plot, bokeh_dashboard, feature_importances
 
 app = Flask(__name__)
@@ -64,7 +64,7 @@ def result_credit():
     if request.method == 'GET':
         return f"The URL /data is accessed directly. Try going to '/test_credit' to submit credit_ID"
     if request.method == 'POST':
-        return predict_credit(request.form['credit_ID'])
+        return predict_credit_page(request.form['credit_ID'])
         # return feature_importances(request.form['credit_ID'])
 
 
